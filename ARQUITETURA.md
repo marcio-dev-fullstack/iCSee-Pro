@@ -1,35 +1,80 @@
-### 1. Arquitetura do Sistema
+# 🛡️ iCSee-Pro | Documentação de Arquitetura
 
-Para rodar localmente ou no GitHub (via Cloud Run/VPS), você deve separar a lógica em três pilares:
+**Projeto:** Monitoramento de Alta Disponibilidade
 
-* **Ingestão de Vídeo (Backend):** Use **FastAPI** para gerenciar a comunicação com as câmeras. Você pode usar o **FFmpeg** (via Docker) para capturar o stream RTSP das câmeras e processá-lo.
-* **Identidade:** Utilize **Firebase Authentication** (Google Sign-In). É o padrão de mercado para Flutter e permite que o usuário faça login com a conta Google de forma nativa e segura.
-* **Armazenamento:** Utilize a **API do Google Drive**. Em vez de salvar no servidor local, o seu backend (ou a própria aplicação Flutter, dependendo da estratégia) fará o upload dos arquivos para pastas específicas no Drive do usuário.
+**Plataforma:** iCSee-Pro
 
-### 2. Implementação Técnica Recomendada
+**Desenvolvedor:** RAZGO Tecnologia
 
-#### A. O App (Frontend - Flutter)
+---
 
-* **Player de Vídeo:** Utilize o pacote `vlc_flutter_plugin` ou `fijkplayer`. Eles são robustos para lidar com streams de rede (RTSP/RTMP).
-* **Autenticação:** Integre `google_sign_in` e `firebase_auth`.
-* **Gerenciamento de Arquivos:** Use a `googleapis` package para Flutter. Com ela, você pode autenticar o usuário e realizar chamadas `drive.files.create` para enviar os vídeos capturados diretamente para o Drive.
+## 1. Visão Geral da Arquitetura
 
-#### B. Backend (Serviço Local ou Cloud - FastAPI)
+O sistema **iCSee-Pro** é estruturado em três pilares fundamentais, desenhados para alta escalabilidade e integração nativa com o ecossistema Google:
 
-* **Webhook de Câmera:** Sua API deve atuar como um orquestrador. Se a câmera for inteligente, ela pode enviar um *trigger* (evento de movimento) via HTTP para sua API.
-* **Google Drive Integration (Service Account):**
-* No seu projeto Google Cloud, crie uma **Service Account** com permissões para o Drive.
-* Sua API usará essa credencial para criar pastas automáticas por data ou por câmera no Drive do usuário.
-* *Dica:* Para economizar banda, não faça o stream passar pelo servidor; apenas processe os metadados e os eventos de gravação.
+* **Ingestão (Backend):** Utiliza **FastAPI** como orquestrador, com processamento de streams RTSP via **FFmpeg** em ambiente Docker.
 
-### 3. Roteiro de Desenvolvimento (MVP)
 
-1. **Fase 1 (Autenticação):** Configure o Firebase no seu projeto Flutter com Login via Google.
-2. **Fase 2 (Conexão):** Crie uma interface no Flutter que peça apenas o endereço IP e a porta RTSP da câmera. Teste a visualização em tempo real (Live Preview).
-3. **Fase 3 (Integração Drive):** Implemente a biblioteca `googleapis` para listar pastas do Drive. Crie uma função que pegue um arquivo local (`.mp4`) e faça o upload para uma pasta chamada `Monitoramento_MAZZ`.
-4. **Fase 4 (Automação):** No backend, crie um *worker* com **Docker** que detecte quando a câmera disparou um alerta e acione o script de upload.
+* **Identidade:** Implementa **Firebase Authentication** com Google Sign-In, garantindo uma camada de autenticação segura e nativa.
 
-### Considerações Críticas
 
-* **Latência:** Fazer o upload de vídeo em tempo real para o Drive pode consumir muita banda de *upload*. Recomendo implementar uma lógica de **buffer local**: grave em um volume Docker no seu servidor local, e faça o upload para o Google Drive em background (batch process) a cada 5 ou 10 minutos.
-* **Privacidade:** Como você lida com monitoramento, lembre-se de que, ao usar o Google Drive como storage, você está sujeito aos termos de serviço da Google. Certifique-se de que a autenticação esteja sempre atrelada ao dono da câmera.
+* **Armazenamento:** Integração direta com a **API do Google Drive** para persistência em nuvem, eliminando a dependência de armazenamento local.
+
+
+
+---
+
+## 2. Especificações Técnicas
+
+### 📱 Frontend (Flutter)
+
+* **Streaming:** Utilização de `vlc_flutter_plugin` ou `fijkplayer` para suporte robusto a protocolos RTSP/RTMP.
+
+
+* **Autenticação:** Integração dos pacotes `google_sign_in` e `firebase_auth`.
+
+
+* **File Management:** Uso da biblioteca `googleapis` para gerenciar chamadas de `drive.files.create`.
+
+
+
+### ⚙️ Backend (FastAPI)
+
+* **Orquestração:** O serviço atua como um hub para *webhooks*, processando eventos de movimento disparados por câmeras inteligentes.
+
+
+* **Google Drive Integration:** Implementação via **Service Account** no Google Cloud Console, permitindo a criação dinâmica de pastas.
+
+
+* **Otimização de Banda:** O sistema processa apenas metadados e eventos no servidor, evitando a sobrecarga de tráfego de stream.
+
+
+
+---
+
+## 3. Roteiro de Implementação (MVP)
+
+| Fase | Objetivo | Ação Principal |
+| --- | --- | --- |
+| **01** | **Autenticação** | Configuração do Firebase com Login via Google.
+
+ |
+| **02** | **Conectividade** | Interface Flutter para IP/Porta RTSP e *Live Preview*.
+
+ |
+| **03** | **Integração Drive** | Implementação de `googleapis` para upload automático na pasta `Monitoramento_MAZZ`.
+
+ |
+| **04** | **Automação** | *Worker* Docker para detecção de alertas e disparo de upload.
+
+ |
+
+---
+
+## ⚠️ Considerações Críticas
+
+> **Latência e Performance:** O upload em tempo real pode saturar a largura de banda. Recomenda-se a utilização de **buffer local** em volumes Docker, com processamento em *batch* programado a cada 5 ou 10 minutos.
+> 
+> 
+
+> **Conformidade e Privacidade:** A integração com o Google Drive está sujeita aos Termos de Serviço da Google. É mandatório que a autenticação esteja sempre vinculada ao proprietário da câmera, garantindo a integridade dos dados.
