@@ -1,4 +1,4 @@
-# 🛡️ iCSee-Pro | Documentação de Arquitetura
+# 🛡️ iCSee-Pro
 
 **Projeto:** Monitoramento de Alta Disponibilidade
 
