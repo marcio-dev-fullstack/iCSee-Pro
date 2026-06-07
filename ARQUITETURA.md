@@ -58,7 +58,7 @@ O sistema **iCSee-Pro** é estruturado em três pilares fundamentais, desenhados
 | --- | --- | --- |
 | **01** | **Autenticação** | Configuração do Firebase com Login via Google.
 | **02** | **Conectividade** | Interface Flutter para IP/Porta RTSP e *Live Preview*.
-| **03** | **Integração Drive** | Implementação de `googleapis` para upload automático na pasta `Monitoramento_MAZZ`.
+| **03** | **Integração Drive** | Implementação de `googleapis` para upload automático na pasta `Monitoramento_iCSee-Pro`.
 | **04** | **Automação** | *Worker* Docker para detecção de alertas e disparo de upload.
 
 ---
